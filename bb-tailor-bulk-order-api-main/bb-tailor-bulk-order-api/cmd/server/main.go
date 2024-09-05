@@ -7,12 +7,19 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
+	"database/sql"
+	"github.com/go-sql-driver/mysql"
 	"git.bopconsultancy.com/tejasc/bb-tailor-bulk-order-api/internal/config"
 	"git.bopconsultancy.com/tejasc/bb-tailor-bulk-order-api/internal/server"
 )
 
 func main() {
+	dsn := "doadmin:BOP@test24New@tcp(localhost:3306)/defaultdb"
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
