@@ -1,0 +1,292 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Brooks Bingham Tailor Bulk Orders API",
+    "description": "RESTful API for Brooks Bingham Tailor Bulk Order App",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5200",
+      "description": "Development Server"
+    },
+    {
+      "url": "https://api.tailor-bulk-orders.brooksbingham.com",
+      "description": "Production Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Health Checks",
+      "description": "Endpoints related to health checks."
+    },
+    {
+      "name": "Auth",
+      "description": "Endpoints related to authentication."
+    },
+    {
+      "name": "Users",
+      "description": "Endpoints related to users."
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Health Checks"
+        ],
+        "summary": "Check server health",
+        "description": "Returns a simple health status of the server.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "User Login",
+        "description": "Logs in a user.",
+        "requestBody": {
+          "description": "User login payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User logged in successfully, JWT token pair generated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User performed a bad request, request body validation failure.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authorized, email and password mismatch.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get all users with their metadata",
+        "description": "Returns a list of users with their metadata.",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUsersSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "UnauthorizedResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message of authentication failure."
+          }
+        }
+      },
+      "ForbiddenResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message of authorization failure."
+          }
+        }
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Message indicating the status of the server."
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the server."
+          }
+        }
+      },
+      "LoginSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access token generated for the user."
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token generated for the user."
+          }
+        }
+      },
+      "LoginBadRequestResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message of bad request."
+          }
+        }
+      },
+      "LoginPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address of the user."
+          },
+          "password": {
+            "type": "string",
+            "description": "user's password for login."
+          }
+        }
+      },
+      "GetUsersSuccessResponse": {
+        "type": "array",
+        "description": "The list of users with their metadata",
+        "items": {
+          "type": "object",
+          "properties": {
+            "ID": {
+              "type": "string",
+              "description": "The ID of the user"
+            },
+            "Email": {
+              "type": "string",
+              "description": "The email of the user"
+            },
+            "Roles": {
+              "type": "array",
+              "description": "The list of roles of the user",
+              "items": {
+                "type": "string",
+                "description": "The role of the user"
+              }
+            },
+            "Profile": {
+              "type": "object",
+              "properties": {
+                "ID": {
+                  "type": "string",
+                  "description": "The profile ID of the user"
+                },
+                "FirstName": {
+                  "type": "string",
+                  "description": "The first name of the user"
+                },
+                "LastName": {
+                  "type": "string",
+                  "description": "The last name of the user"
+                },
+                "Phone": {
+                  "type": "string",
+                  "description": "The phone number of the user"
+                },
+                "Age": {
+                  "type": "number",
+                  "description": "The age of the user"
+                },
+                "Gender": {
+                  "type": "string",
+                  "description": "The gender of the user"
+                }
+              }
+            },
+            "CreatedAt": {
+              "type": "string",
+              "description": "The created at date-time of the user"
+            },
+            "UpdatedAt": {
+              "type": "string",
+              "description": "The updated at date-time of the user"
+            }
+          }
+        }
+      }
+    }
+  }
+}
